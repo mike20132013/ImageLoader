@@ -3,6 +3,7 @@ package com.mike.imageloader;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -47,24 +48,32 @@ public class ImageLoaderClass {
 
 		private String URLS;
 		private ImageView mImageView;
+		private final WeakReference<ImageView> imageViewReference;
 
 		public DownloadImages(String URLS, ImageView mImageView) {
 
 			this.URLS = URLS;
 			this.mImageView = mImageView;
+			imageViewReference = new WeakReference<ImageView>(mImageView);
 
 		}
 
 		@Override
 		protected Bitmap doInBackground(String... params) {
 
-			return null;
+			
+			Bitmap mBitmap = downloadURL(URLS);
+
+			return mBitmap;
 		}
 
 		@Override
-		protected void onPostExecute(Bitmap result) {
-			// TODO Auto-generated method stub
-			super.onPostExecute(result);
+		protected void onPostExecute(Bitmap bitmap) {
+
+			mImageView = imageViewReference.get();
+
+			mImageView.setImageBitmap(bitmap);
+
 		}
 
 	}
@@ -91,15 +100,11 @@ public class ImageLoaderClass {
 			final HttpEntity mHttpEntity = mHttpResponse.getEntity();
 			if (mHttpEntity != null) {
 
-				FlushedInputStream iFlushedInputStream = null;
+				InputStream is = null;
 
 				try {
 
-					iFlushedInputStream = (FlushedInputStream) mHttpEntity
-							.getContent();
-
-					final Bitmap tempBitmap = BitmapFactory
-							.decodeStream(iFlushedInputStream);
+					is = mHttpEntity.getContent();
 
 					final BitmapFactory.Options options = new BitmapFactory.Options();
 					options.inJustDecodeBounds = true;
@@ -109,18 +114,18 @@ public class ImageLoaderClass {
 					mRect = new Rect(2, 2, 2, 2);
 
 					final Bitmap bitmap = BitmapFactory.decodeStream(
-							iFlushedInputStream, mRect, options);
+							is, mRect, options);
 
 					return bitmap;
 
 				} finally {
 
-					if (iFlushedInputStream != null) {
+					if (is != null) {
 						/**
 						 * Important to close the input stream. May cause
 						 * battery draining and leaks.
 						 **/
-						iFlushedInputStream.close();
+						is.close();
 					}
 
 					mHttpEntity.consumeContent();
