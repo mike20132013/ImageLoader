@@ -3,20 +3,20 @@ package com.mike.imageloader;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 
-import com.mike.utils.L;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.widget.ImageView;
+
+import com.mike.utils.L;
 
 public class ImageLoaderClass {
 
@@ -27,6 +27,8 @@ public class ImageLoaderClass {
 	private static final String ERROR_CODE = "ERROR CODE : ";
 	private static final boolean DEBUG = true;// Change to false if no Log is
 												// required.
+
+	private Rect mRect;
 
 	public ImageLoaderClass() {
 
@@ -99,7 +101,17 @@ public class ImageLoaderClass {
 					final Bitmap tempBitmap = BitmapFactory
 							.decodeStream(iFlushedInputStream);
 
-					return tempBitmap;
+					final BitmapFactory.Options options = new BitmapFactory.Options();
+					options.inJustDecodeBounds = true;
+					options.inSampleSize = calculateInSampleSize(options);
+					options.inJustDecodeBounds = false;
+
+					mRect = new Rect(2, 2, 2, 2);
+
+					final Bitmap bitmap = BitmapFactory.decodeStream(
+							iFlushedInputStream, mRect, options);
+
+					return bitmap;
 
 				} finally {
 
