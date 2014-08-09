@@ -10,6 +10,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
@@ -21,7 +23,6 @@ import com.mike.utils.L;
 
 public class ImageLoaderClass {
 
-	private Bitmap mBitmap;
 	private static final int LOAD_BITMAP_URL = 1;
 	private static final int LOAD_BITMAP_SDCARD = 2;
 	private static final String TAG = "IMAGE LOADER : ";
@@ -59,9 +60,13 @@ public class ImageLoaderClass {
 		}
 
 		@Override
+		protected void onPreExecute() {
+
+		}
+
+		@Override
 		protected Bitmap doInBackground(String... params) {
 
-			
 			Bitmap mBitmap = downloadURL(URLS);
 
 			return mBitmap;
@@ -75,6 +80,12 @@ public class ImageLoaderClass {
 			mImageView.setImageBitmap(bitmap);
 
 		}
+
+	}
+
+	public boolean enableProgressDialog() {
+
+		return true;
 
 	}
 
@@ -113,8 +124,8 @@ public class ImageLoaderClass {
 
 					mRect = new Rect(2, 2, 2, 2);
 
-					final Bitmap bitmap = BitmapFactory.decodeStream(
-							is, mRect, options);
+					final Bitmap bitmap = BitmapFactory.decodeStream(is, mRect,
+							options);
 
 					return bitmap;
 
